@@ -1,0 +1,19 @@
+{
+    "instances": [
+    {
+      "ServerHeaders": {
+        "Server": "NetDNA-cache/2.81",
+        "Cache-Control": "max-age=0, no-cache",
+        "Pragma": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Type": "application/javascript; charset=utf-8"
+      },
+      "port": 81,
+      "key_path": "privkey.pem",
+      "cert_path": "fullchain.pem",
+      "debug": true,
+      "use_ssl": false
+      }
+    ]
+  }
+  
