@@ -6,6 +6,7 @@ It is initially based on the [Multi-Stage-Mythic](https://github.com/kyleavery/M
 * Cloudfront geo-restriction to cut noise from mass scanners and defeat some security solutions hosted in other countries
 * Use of Cloudfront prefix list in the security group of the load balancer to prevent direct access
 * ALB instead of ELB for content-based routing and WebSockets support
+* ALB access logging for debugging / compliance purposes
 * Use of SSM Session Manager instead of open SSH to avoid exposing the SSH port or setting up a bastion host. The instance is in a private subnet, with no public IP address assigned
 * Use of EC2 `user-data` instead of Terraform's `remote-exec` provider as there's no native SSM support for the latter
 * Dynamic Ubuntu AMI via aws_ami data source, to get the latest AMI and no hardcoded, region-dependent AMI ID
