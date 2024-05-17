@@ -39,8 +39,8 @@ data "cloudinit_config" "mythic_v3_user_data" {
       cd /opt/Mythic && sudo make
       sudo /opt/Mythic/mythic-cli install github https://github.com/MythicAgents/apfell # macOS JXA agent
       sudo /opt/Mythic/mythic-cli install github https://github.com/MythicC2Profiles/http
-      sudo mv /home/ubuntu/http_config.json /opt/Mythic/InstalledServices/http/http/c2_code/config.json
       sudo /opt/Mythic/mythic-cli start
+      sudo mv /home/ubuntu/http_config.json /var/lib/docker/volumes/http_volume/_data/http/c2_code/config.json
     EOF
   }
 
