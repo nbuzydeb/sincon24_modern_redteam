@@ -1,5 +1,27 @@
 // https://www.christopherblack.net/2021-01-16-terraform-copy-files/
 locals {
+  phishing_files = fileset("../deps/muraena", "**/*")
+
+  unique_phishing_dirs = distinct([for file in local.phishing_files : dirname("/home/ssm-user/MURAENA/${file}")])
+
+  write_files_phishing = [for file in local.phishing_files : {
+    path        = "/home/ssm-user/MURAENA/${file}"
+    permissions = "0644"
+    owner       = "root:root"
+    encoding    = "gz+b64"
+    content     = base64gzip(file("../deps/muraena/${file}"))
+  }]
+
+  cloud_config_phishing = <<-END
+    #cloud-config
+    ${jsonencode({
+      "write_files": local.write_files_phishing,
+      "runcmd": [
+        flatten([for dir in local.unique_phishing_dirs : ["mkdir","-p","${dir}"]])
+      ]
+    })}
+  END
+
   cloud_config_config = <<-END
     #cloud-config
     ${jsonencode({
@@ -51,6 +73,12 @@ data "cloudinit_config" "phishing_user_data" {
   base64_encode = false
 
   part {
+    content_type = "text/cloud-config"
+    filename     = "cloudconfig_phishing.txt"
+    content      = local.cloud_config_phishing
+  }
+
+  part {
     content_type = "text/x-shellscript"
     filename     = "install.sh"
     content      = <<-EOF
@@ -65,6 +93,7 @@ data "cloudinit_config" "phishing_user_data" {
       sudo git clone https://github.com/kgretzky/evilginx2.git /opt/evilginx2
       sudo curl -L https://github.com/muraenateam/muraena/releases/download/v1.23/muraena_linux_arm64 --create-dirs --output /opt/muraena/muraena
       sudo chmod -R +rx /opt/muraena/
+      sudo chown -R ssm-user:ssm-user /home/ssm-user/MURAENA/
       cd /opt/evilginx2 && sudo make && chmod +x build/evilginx
     EOF
   }
