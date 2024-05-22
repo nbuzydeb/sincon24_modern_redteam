@@ -2,10 +2,10 @@
 locals {
   phishing_files = fileset("../deps/muraena", "**/*")
 
-  unique_phishing_dirs = distinct([for file in local.phishing_files : dirname("/home/ssm-user/MURAENA/${file}")])
+  unique_phishing_dirs = distinct([for file in local.phishing_files : dirname("/opt/muraena/${file}")])
 
   write_files_phishing = [for file in local.phishing_files : {
-    path        = "/home/ssm-user/MURAENA/${file}"
+    path        = "/opt/muraena/${file}"
     permissions = "0644"
     owner       = "root:root"
     encoding    = "gz+b64"
@@ -16,8 +16,8 @@ locals {
     #cloud-config
     ${jsonencode({
       "write_files": local.write_files_phishing,
-      "runcmd": [
-        flatten([for dir in local.unique_phishing_dirs : ["mkdir","-p","${dir}"]])
+      "runcmd": [["mkdir","-p","/opt/muraena/"],
+        flatten([for dir in local.unique_phishing_dirs : ["mkdir","-p","${dir}"]]),
       ]
     })}
   END
@@ -83,18 +83,18 @@ data "cloudinit_config" "phishing_user_data" {
     filename     = "install.sh"
     content      = <<-EOF
       #!/bin/bash
-      sudo snap install --classic go
-      sudo apt-get -qq update && sudo apt-get -qq install -y git redis-server make curl
-      sudo systemctl enable redis-server.service
+      snap install --classic go
+      apt-get -qq update && apt-get -qq install -y git redis-server make curl
+      systemctl enable redis-server.service
       # modify configuration file in /etc/redis/redis.conf
-      echo "maxmemory 256mb" | sudo tee -a /etc/redis/redis.conf  > /dev/null
-      echo "maxmemory-policy allkeys-lru" | sudo tee -a /etc/redis/redis.conf  > /dev/null
-      sudo systemctl restart redis-server.service
-      sudo git clone https://github.com/kgretzky/evilginx2.git /opt/evilginx2
-      sudo curl -L https://github.com/muraenateam/muraena/releases/download/v1.23/muraena_linux_arm64 --create-dirs --output /opt/muraena/muraena
-      sudo chmod -R +rx /opt/muraena/
-      sudo chown -R ssm-user:ssm-user /home/ssm-user/MURAENA/
-      cd /opt/evilginx2 && sudo make && chmod +x build/evilginx
+      echo "maxmemory 256mb" | tee -a /etc/redis/redis.conf  > /dev/null
+      echo "maxmemory-policy allkeys-lru" | tee -a /etc/redis/redis.conf  > /dev/null
+      systemctl restart redis-server.service
+      git clone https://github.com/kgretzky/evilginx2.git /opt/evilginx2
+      curl -L https://github.com/muraenateam/muraena/releases/download/v1.23/muraena_linux_arm64 --output /opt/muraena/muraena
+      chmod -R +rx /opt/muraena/
+      export GOCACHE=/root/go/cache
+      cd /opt/evilginx2 && make && chmod +x build/evilginx
     EOF
   }
 
