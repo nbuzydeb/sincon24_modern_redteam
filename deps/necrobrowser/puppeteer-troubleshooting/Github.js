@@ -11,6 +11,7 @@ const GITHUB_USER = 'test-account';
 const GITHUB_PWD = 'P@ssw0rd';
 
 (async () => {
+//const browser = await puppeteer.launch({ headless: false, executablePath: '/usr/local/bin/chromium' });
 const browser = await puppeteer.launch({headless: false})
 const page = await browser.newPage()
 const url = 'https://github.com/login'

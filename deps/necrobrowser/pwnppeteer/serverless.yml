@@ -1,0 +1,83 @@
+service: lambda-pwnppeteer
+# app and org for use with dashboard.serverless.com
+#app: pwnppeteer
+#org: your-org-name
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+# frameworkVersion: "=X.X.X"
+
+custom:
+  ##bucket: <your own name>
+  ##  Resource: "arn:aws:s3:::${self:custom.bucket}/*"
+  bucket: pwnppeteer-sincon
+
+provider:
+  name: aws
+  profile: AWS_PROFILE
+  runtime: nodejs18.x
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - lambda:InvokeFunction
+        - lambda:InvokeAsync
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "s3:*"
+      Resource: "arn:aws:s3:::${self:custom.bucket}/*"
+  ## hardcoded
+  #   Resource: "arn:aws:s3:::pwnppeteer/*"
+
+# you can overwrite defaults here
+  stage: dev
+# region is something you have to consider depending where your target is
+# located
+  region: ap-southeast-1
+
+package:
+  exclude:
+    - node_modules/puppeteer/.local-chromium/**
+
+functions:
+  Pwnppeteer: ## Orchestration
+    handler: handler.pwn
+    events:
+      - http:
+          # set what ever you want here
+          path: /instrument/muraena
+          method: post
+  PwnGithub: ## Github profil
+    handler: github.pwn
+    timeout: 30 ## Need to be set for the first execution of the lambda - default 6s is too short
+    environment:
+      BUCKET_NAME: ${self:custom.bucket}
+  PwnSNK: ## Test/Debug Lamda
+    handler: snk.pwn
+    timeout: 30 ## Need to be set for the first execution of the lambda - default 6s is too short
+    environment:
+      BUCKET_NAME: ${self:custom.bucket}
+      ## hardcoded
+      #BUCKET_NAME: pwnppeteer
+
+# Add dedicated s3 bucket to store results.
+# Privileges are too permissive , must be restricted
+resources:
+  Resources:
+    UploadBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucket}
+        #AccessControl: PublicRead
+        AccessControl: Private
+        CorsConfiguration:
+          CorsRules:
+          - AllowedMethods:
+            - GET
+            - PUT
+            - POST
+            - HEAD
+            AllowedOrigins:
+            - "*"
+            AllowedHeaders:
+            - "*"
