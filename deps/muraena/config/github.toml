@@ -154,10 +154,10 @@ externalOrigins = [
     #certificate = "/etc/letsencrypt/live/outofscope.gdn-0001/cert.pem"
     #key = "/etc/letsencrypt/live/outofscope.gdn-0001/privkey.pem"
     #root = "/etc/letsencrypt/live/outofscope.gdn-0001/fullchain.pem"
-    certificate = "./cert/_wildcard.<yourdomain>.pem"
-    key = "./cert/_wildcard.<yourdomain>.pem" 
-    root = "./cert/rootCA.pem"
-    sslKeyLog = "./config/sslkeylog.log"
+    certificate = "./config/cert/_wildcard.<yourdomain>.pem"
+    key = "./config/cert/_wildcard.<yourdomain>.pem" 
+    root = "./config/cert/rootCA.pem"
+    #sslKeyLog = "./config/sslkeylog.log"
 
 	#
 	# Danger zone, be careful editing these settings
